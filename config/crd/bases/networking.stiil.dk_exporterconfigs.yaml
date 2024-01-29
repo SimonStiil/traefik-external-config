@@ -1,0 +1,125 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.13.0
+  name: exporterconfigs.networking.stiil.dk
+spec:
+  group: networking.stiil.dk
+  names:
+    kind: ExporterConfig
+    listKind: ExporterConfigList
+    plural: exporterconfigs
+    singular: exporterconfig
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ExporterConfig is the Schema for the exporterconfigs API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: ExporterConfigSpec defines the desired state of ExporterConfig
+            properties:
+              cluster:
+                properties:
+                  ingress:
+                    properties:
+                      address:
+                        type: string
+                      http:
+                        properties:
+                          port:
+                            type: string
+                          protocol:
+                            type: string
+                        required:
+                        - port
+                        - protocol
+                        type: object
+                      https:
+                        properties:
+                          port:
+                            type: string
+                          protocol:
+                            type: string
+                        required:
+                        - port
+                        - protocol
+                        type: object
+                    type: object
+                  rootCAFilename:
+                    type: string
+                type: object
+              ingressClassName:
+                description: Foo is an example field of ExporterConfig. Edit exporterconfig_types.go
+                  to remove/update
+                type: string
+              printDebug:
+                properties:
+                  enable:
+                    type: boolean
+                  httpok:
+                    type: boolean
+                type: object
+              traefik:
+                properties:
+                  entrypoint:
+                    properties:
+                      http:
+                        type: string
+                      https:
+                        type: string
+                    type: object
+                type: object
+            type: object
+          status:
+            description: ExporterConfigStatus defines the observed state of ExporterConfig
+            properties:
+              loadbalancer:
+                description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                  of cluster Important: Run "make" to regenerate code after modifying
+                  this file'
+                properties:
+                  address:
+                    type: string
+                  http:
+                    properties:
+                      port:
+                        type: string
+                      protocol:
+                        type: string
+                    required:
+                    - port
+                    - protocol
+                    type: object
+                  https:
+                    properties:
+                      port:
+                        type: string
+                      protocol:
+                        type: string
+                    required:
+                    - port
+                    - protocol
+                    type: object
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

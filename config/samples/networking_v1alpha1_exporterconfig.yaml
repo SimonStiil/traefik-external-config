@@ -1,0 +1,12 @@
+apiVersion: networking.stiil.dk/v1alpha1
+kind: ExporterConfig
+metadata:
+  labels:
+    app.kubernetes.io/name: exporterconfig
+    app.kubernetes.io/instance: exporterconfig-sample
+    app.kubernetes.io/part-of: traefik-external-config
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: traefik-external-config
+  name: exporterconfig-sample
+spec:
+  # TODO(user): Add fields here

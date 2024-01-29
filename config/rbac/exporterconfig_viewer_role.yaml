@@ -1,0 +1,27 @@
+# permissions for end users to view exporterconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: exporterconfig-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: traefik-external-config
+    app.kubernetes.io/part-of: traefik-external-config
+    app.kubernetes.io/managed-by: kustomize
+  name: exporterconfig-viewer-role
+rules:
+- apiGroups:
+  - networking.stiil.dk
+  resources:
+  - exporterconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - networking.stiil.dk
+  resources:
+  - exporterconfigs/status
+  verbs:
+  - get
