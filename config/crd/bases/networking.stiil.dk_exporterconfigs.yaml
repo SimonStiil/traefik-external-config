@@ -12,7 +12,7 @@ spec:
     listKind: ExporterConfigList
     plural: exporterconfigs
     singular: exporterconfig
-  scope: Namespaced
+  scope: Cluster
   versions:
   - name: v1alpha1
     schema:
@@ -62,6 +62,8 @@ spec:
                         type: object
                     type: object
                   rootCAFilename:
+                    type: string
+                  serviceName:
                     type: string
                 type: object
               ingressClassName:

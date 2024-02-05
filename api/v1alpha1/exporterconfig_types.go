@@ -40,7 +40,8 @@ type PrintDebug struct {
 }
 type Cluster struct {
 	Ingress        `json:"ingress,omitempty" protobuf:"bytes,1,opt,name=ingress"`
-	RootCAFilename string `json:"rootCAFilename,omitempty" protobuf:"bytes,2,opt,name=rootCAFilename"`
+	ServiceName    string `json:"serviceName,omitempty" protobuf:"bytes,2,opt,name=serviceName"`
+	RootCAFilename string `json:"rootCAFilename,omitempty" protobuf:"bytes,3,opt,name=rootCAFilename"`
 }
 type Ingress struct {
 	Address string `json:"address,omitempty" protobuf:"bytes,1,opt,name=address"`
@@ -68,6 +69,7 @@ type ExporterConfigStatus struct {
 
 //+kubebuilder:object:root=true
 //+kubebuilder:subresource:status
+//+kubebuilder:resource:path=exporterconfigs,scope=Cluster
 
 // ExporterConfig is the Schema for the exporterconfigs API
 type ExporterConfig struct {

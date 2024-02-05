@@ -17,9 +17,13 @@ limitations under the License.
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
+	"net/http"
 	"os"
 
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
@@ -38,8 +42,9 @@ import (
 )
 
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme         = runtime.NewScheme()
+	setupLog       = ctrl.Log.WithName("setup")
+	lockableConfig = &controller.LockableConfig{}
 )
 
 func init() {
@@ -53,8 +58,10 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
+	var apiAddr string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
+	flag.StringVar(&apiAddr, "api-bind-address", ":8082", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
@@ -92,6 +99,9 @@ func main() {
 	if err = (&controller.ExporterConfigReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		// This "Recorder" is required for sending events!!!. Do remember it.
+		Recorder: mgr.GetEventRecorderFor("exporterconfig-controller"),
+		Config:   lockableConfig,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "ExporterConfig")
 		os.Exit(1)
@@ -107,9 +117,29 @@ func main() {
 		os.Exit(1)
 	}
 
+	//Start API server (if leader)
+	SetupConfigAPIServer(mgr, apiAddr)
+
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+}
+
+func SetupConfigAPIServer(mgr manager.Manager, apiAddr string) {
+	go func() {
+		// This channel is closed when this instance is elected leader
+		// Apparently there's no releasing the lease except if application dies
+		<-mgr.Elected()
+		setupLog.Info(fmt.Sprintf("Controller elected - apiServer setup on %s", apiAddr))
+		http.HandleFunc("/", MainHandler)
+		setupLog.Error(http.ListenAndServe(apiAddr, nil), "APIServer stopped with error")
+	}()
+}
+
+func MainHandler(w http.ResponseWriter, r *http.Request) {
+	config := lockableConfig.GetConfig()
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(config)
 }
